@@ -3,9 +3,47 @@
 #include "Utils.hpp"
 #include <cmath>
 
+
 using namespace std;
 using namespace Eigen;
 using namespace PolygonalLibrary;
+
+
+void PrintMeshInfo(const PolygonalMesh& mesh)
+{
+    cout << "=== CELL 0D ===" << endl;
+    for (unsigned int i = 0; i < mesh.NumCell0Ds; ++i)
+    {
+        cout << "Id: " << mesh.Cell0DsId[i]
+             << ", Marker: " << mesh.Cell0DsMarker[i]
+             << ", Coordinates: (" << mesh.Cell0DsCoordinates(0, i)
+             << ", " << mesh.Cell0DsCoordinates(1, i) << ")" << endl;
+    }
+
+    cout << "\n=== CELL 1D ===" << endl;
+    for (unsigned int i = 0; i < mesh.NumCell1Ds; ++i)
+    {
+        cout << "Id: " << mesh.Cell1DsId[i]
+             << ", Marker: " << mesh.Cell1DsMarker[i]
+             << ", Origin: " << mesh.Cell1DsExtrema(0, i)
+             << ", End: " << mesh.Cell1DsExtrema(1, i) << endl;
+    }
+
+    cout << "\n=== CELL 2D ===" << endl;
+    for (unsigned int i = 0; i < mesh.NumCell2Ds; ++i)
+    {
+        cout << "Id: " << mesh.Cell2DsId[i]
+             << ", Marker: " << mesh.Cell2DsMarker[i]
+             << "\nVertices: ";
+        for (auto v : mesh.Cell2DsVertices[i])
+            cout << v << " ";
+        cout << "\nEdges: ";
+        for (auto e : mesh.Cell2DsEdges[i])
+            cout << e << " ";
+        cout << "\n" << endl;
+    }
+}
+
 
 // calcolo lunghezza segmento tra due punti
 double edgeLength( double x0, double y0, double x1, double y1)
@@ -36,27 +74,30 @@ int main()
 {
 	PolygonalMesh mesh;
 	
+
 	if(!ImportMesh(mesh))
 	{
 		cerr << "File not found" << endl;
 		return 1;
 	}
 	
+
 	// test 1: memorizzazione corretta marker
 	bool marker0Ok = true;
+	//cout << "mesh.Cell0DsMarker.size() = "<< mesh.Cell0DsMarker.size() << "mesh.NumCell0Ds = "<< mesh.NumCell0Ds << endl;
 	if (mesh.Cell0DsMarker.size() != mesh.NumCell0Ds)
 	{
 		cerr << "I marker in Cell0D non sono stati letti correttamente" << endl;
 		marker0Ok = false;
 	}
-	
+	//cout << "mesh.Cell1DsMarker.size() = "<< mesh.Cell1DsMarker.size() << "mesh.NumCell1Ds = "<< mesh.NumCell1Ds << endl;
 	bool marker1Ok = true;
 	if (mesh.Cell1DsMarker.size() != mesh.NumCell1Ds)
 	{
 		cerr << "I marker in Cell1D non sono stati letti correttamente" << endl;
 		marker1Ok = false;
 	}
-	
+	//cout << "mesh.Cell2DsMarker.size() = "<< mesh.Cell2DsMarker.size() << "mesh.NumCell2Ds = "<< mesh.NumCell2Ds << endl;
 	bool marker2Ok = true;
 	if (mesh.Cell2DsMarker.size() != mesh.NumCell2Ds)
 	{
@@ -65,7 +106,7 @@ int main()
 	}
 	
 	if (marker0Ok & marker1Ok & marker2Ok)
-		cout << "Test 1 superato" << endl;
+		cout << "Test 1 superato: i marker sono stati letti corretamente" << endl;
 	else
 		cout << "Test 1 fallito" << endl;
 	
@@ -88,7 +129,7 @@ int main()
 		}
 	}
 	if (edgesOk)
-        cout << "Test 2 superato" << endl;
+        cout << "Test 2 superato: nessun lato ha lunghezza nulla (o inferiore alla precisione di macchina)" << endl;
 	else 
 		cout << "Test 2 fallito" << endl;
 	
@@ -105,9 +146,12 @@ int main()
         }
     }
     if (areaOk)
-        cout << "Test 3 superato" << endl;
+        cout << "Test 3 superato: nessun poligono ha area nulla (o inferiore alla precisione di macchina)" << endl;
 	else 
 		cout << "Test 3 fallito" << endl;
-		
+	
+	cout << "Visualizzazione dati : " << endl;
+	PrintMeshInfo(mesh);
+
     return 0;
 }
